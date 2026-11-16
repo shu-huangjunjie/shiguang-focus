@@ -1,0 +1,22 @@
+{
+  "name": "shiguang-focus",
+  "version": "0.1.0",
+  "description": "拾光 · 按自己的节奏安排学习与休息的本地专注应用",
+  "private": true,
+  "license": "UNLICENSED",
+  "packageManager": "pnpm@11.25.0",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "dev": "tauri dev",
+    "build:web": "node scripts/build-web.cjs",
+    "build": "tauri build -- --locked",
+    "build:arm64": "tauri build --target aarch64-pc-windows-msvc --bundles nsis -- --locked",
+    "build:x64": "tauri build --target x86_64-pc-windows-msvc --bundles nsis -- --locked",
+    "tauri": "tauri",
+    "test": "node --test tests/*.test.cjs",
+    "test:native": "cargo test --manifest-path src-tauri/Cargo.toml --locked",
+    "collect:arm64": "node scripts/collect-release.cjs aarch64-pc-windows-msvc arm64",
+    "collect:x64": "node scripts/collect-release.cjs x86_64-pc-windows-msvc x64"
+  },
+  "devDependencies": { "@tauri-apps/cli": "2.12.4" }
+}

@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f6f0">
+  <meta name="description" content="拾光，一个安静的学习专注工具。按自己的节奏安排学习与休息，让每一段专注都有迹可循。">
+  <title>拾光 · Focus On</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <script src="timer-engine.js" defer></script>
+  <script src="desktop-bridge.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body data-phase="focus" data-status="idle">
+  <svg class="svg-sprite" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <symbol id="i-leaf" viewBox="0 0 24 24"><path d="M20 4C9 2 3 7 5 14c2 6 12 7 15-10Z"/><path d="M4 21 15 10M8 17v-5m4 1h5"/></symbol>
+      <symbol id="i-sound" viewBox="0 0 24 24"><path d="m11 5-6 4H2v6h3l6 4V5Z"/><path d="M16 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/></symbol>
+      <symbol id="i-mute" viewBox="0 0 24 24"><path d="m11 5-6 4H2v6h3l6 4V5Zm6 4 5 6m0-6-5 6"/></symbol>
+      <symbol id="i-expand" viewBox="0 0 24 24"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></symbol>
+      <symbol id="i-collapse" viewBox="0 0 24 24"><path d="M3 8h5V3m8 0v5h5M8 21v-5H3m13 5v-5h5"/></symbol>
+      <symbol id="i-reset" viewBox="0 0 24 24"><path d="M3 11a9 9 0 1 1 2.4 7.1M3 4v7h7"/></symbol>
+      <symbol id="i-play" viewBox="0 0 24 24"><path d="m8 5 11 7-11 7V5Z"/></symbol>
+      <symbol id="i-pause" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></symbol>
+      <symbol id="i-pencil" viewBox="0 0 24 24"><path d="m16 3 5 5-12 12-6 1 1-6L16 3Zm-3 3 5 5"/></symbol>
+      <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+      <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
+    </defs>
+  </svg>
+
+  <div class="app-shell">
+    <header class="app-header">
+      <div class="brand" aria-label="拾光 Focus On">
+        <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true"><path d="M19 19C8 20 5 13 7 5c9-1 14 4 12 14Z"/><path d="M21 19C20 8 27 5 35 7c1 9-4 14-14 12Z"/><path d="M21 21c11-1 14 6 12 14-9 1-14-4-12-14Z"/><path d="M19 21c1 11-6 14-14 12-1-9 4-14 14-12Z"/></svg>
+        <div class="brand-words"><span class="brand-name">拾光</span><span class="brand-english">FOCUS ON</span></div>
+      </div>
+      <div class="header-right">
+        <time id="local-date" class="local-date"></time>
+        <span class="header-divider" aria-hidden="true"></span>
+        <button id="sound-btn" class="utility-button" type="button" aria-pressed="true" aria-label="关闭声音提醒" title="声音提醒">
+          <svg class="icon" aria-hidden="true"><use id="sound-icon" href="#i-sound"/></svg><span id="sound-state">提示音已开</span>
+        </button>
+        <button id="fullscreen-btn" class="utility-button" type="button" aria-pressed="false" title="沉浸模式">
+          <svg class="icon" aria-hidden="true"><use id="fullscreen-icon" href="#i-expand"/></svg><span id="fullscreen-label">沉浸模式</span>
+        </button>
+      </div>
+    </header>
+
+    <main id="main-app">
+      <section class="welcome" aria-labelledby="welcome-title">
+        <div><p class="eyebrow">A LITTLE TIME, ALL YOURS</p><h1 id="welcome-title">把时间，留给重要的事。</h1><p class="welcome-description">一段学习，一次休息。找到属于你的专注节奏。</p></div>
+        <div class="welcome-note" aria-hidden="true"><span class="note-line"></span><span>慢一点，也没关系。</span><svg class="icon"><use href="#i-leaf"/></svg></div>
+      </section>
+
+      <div class="workspace">
+        <section id="timer-card" class="timer-card" aria-label="专注计时器">
+          <div class="timer-topline"><span id="status-label" class="status-pill" role="status">准备专注</span><span id="round-label" class="round-label">第 1 / 4 轮</span></div>
+          <div class="timer-main">
+            <div id="timer-progress" class="timer-progress" role="progressbar" aria-label="当前阶段进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+              <svg class="progress-dial" viewBox="0 0 300 300" aria-hidden="true">
+                <circle class="dial-outer" cx="150" cy="150" r="146"/>
+                <circle class="dial-ticks" cx="150" cy="150" r="138" pathLength="60"/>
+                <circle class="dial-track" cx="150" cy="150" r="124"/>
+                <circle id="progress-circle" class="dial-progress" cx="150" cy="150" r="124" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100"/>
+                <circle class="dial-point" cx="150" cy="26" r="4"/>
+              </svg>
+              <div class="timer-face"><span id="phase-title" class="phase-title">学习时间</span><div id="countdown" class="countdown">25:00</div><span id="timer-caption" class="timer-caption">此刻，只做一件事</span></div>
+            </div>
+            <div class="task-field"><svg class="icon" aria-hidden="true"><use href="#i-pencil"/></svg><label for="task-input" class="sr-only">本次专注任务</label><input id="task-input" type="text" maxlength="80" autocomplete="off" placeholder="这段时间，想专注做什么？"></div>
+            <p id="next-label" class="next-label">下一步：休息 5 分钟</p>
+            <div class="timer-actions"><button id="start-btn" class="primary-button" type="button"><svg class="icon" aria-hidden="true"><use id="start-icon" href="#i-play"/></svg><span id="start-text">开始专注</span></button><button id="reset-btn" class="reset-button" type="button" aria-label="重置计划" title="重置计划"><svg class="icon" aria-hidden="true"><use href="#i-reset"/></svg></button></div>
+            <button id="skip-btn" class="text-button skip-button" type="button" hidden>跳过休息<svg class="icon" aria-hidden="true"><use href="#i-chevron"/></svg></button>
+            <p class="keyboard-hint"><kbd>Space</kbd><span>开始 / 暂停</span></p>
+          </div>
+          <div class="summary-strip" aria-label="专注统计">
+            <div class="stat"><span class="stat-label">今日专注</span><div><strong id="stat-today-minutes">0</strong><span class="stat-unit">分钟</span></div></div>
+            <div class="stat"><span class="stat-label">完成轮次</span><div><strong id="stat-today-rounds">0</strong><span class="stat-unit">轮</span></div></div>
+            <div class="stat"><span class="stat-label">累计专注</span><div><strong id="stat-total-minutes">0</strong><span class="stat-unit">分钟</span></div></div>
+          </div>
+        </section>
+
+        <aside id="settings-panel" class="settings-panel" aria-labelledby="settings-title">
+          <div class="settings-heading"><div><p class="eyebrow">MAKE IT YOURS</p><h2 id="settings-title">你的专注节奏</h2></div><svg class="settings-leaf icon" aria-hidden="true"><use href="#i-leaf"/></svg></div>
+          <p class="settings-description">好的节奏，是张弛有度。</p>
+          <fieldset id="plan-fields">
+            <legend class="sr-only">学习与休息计划</legend>
+            <div class="presets" aria-label="预设节奏">
+              <button class="preset-btn" type="button" data-focus="15" data-break="5" aria-pressed="false"><span>轻松起步</span><small>15 / 5</small></button>
+              <button class="preset-btn active" type="button" data-focus="25" data-break="5" aria-pressed="true"><span>番茄节奏</span><small>25 / 5</small></button>
+              <button class="preset-btn" type="button" data-focus="50" data-break="10" aria-pressed="false"><span>深度学习</span><small>50 / 10</small></button>
+            </div>
+            <div class="duration-settings">
+              <div class="setting-row"><label for="focus-minutes"><span class="setting-dot focus-dot"></span>学习时长</label><div class="stepper"><button class="step-btn" type="button" data-key="focusMinutes" data-delta="-1" aria-label="减少学习时长">−</button><input id="focus-minutes" type="number" inputmode="numeric" min="1" max="180" step="1" value="25"><button class="step-btn" type="button" data-key="focusMinutes" data-delta="1" aria-label="增加学习时长">+</button></div><span class="setting-unit">分钟</span></div>
+              <div class="setting-row"><label for="break-minutes"><span class="setting-dot break-dot"></span>休息时长</label><div class="stepper"><button class="step-btn" type="button" data-key="breakMinutes" data-delta="-1" aria-label="减少休息时长">−</button><input id="break-minutes" type="number" inputmode="numeric" min="1" max="60" step="1" value="5"><button class="step-btn" type="button" data-key="breakMinutes" data-delta="1" aria-label="增加休息时长">+</button></div><span class="setting-unit">分钟</span></div>
+              <div class="setting-row"><label for="rounds"><svg class="icon rounds-icon" aria-hidden="true"><use href="#i-reset"/></svg>循环轮数</label><div class="stepper"><button class="step-btn" type="button" data-key="rounds" data-delta="-1" aria-label="减少循环轮数">−</button><input id="rounds" type="number" inputmode="numeric" min="1" max="12" step="1" value="4"><button class="step-btn" type="button" data-key="rounds" data-delta="1" aria-label="增加循环轮数">+</button></div><span class="setting-unit">轮</span></div>
+            </div>
+            <label class="switch-row" for="auto-advance"><span><span class="switch-title">自动开始下一阶段</span><small>让学习与休息自然衔接</small></span><span class="switch"><input id="auto-advance" type="checkbox" checked><span class="switch-track" aria-hidden="true"></span></span></label>
+          </fieldset>
+          <p id="lock-note" class="lock-note" hidden>计时中 · 重置计划后可调整节奏</p>
+          <div class="plan-preview"><div class="plan-heading"><span>这一组的时间</span><strong id="total-plan">1 小时 55 分钟</strong></div><div id="plan-track" class="plan-track" role="img" aria-label="学习与休息安排"></div><div class="plan-legend"><span><i class="legend-dot focus-dot"></i>学习</span><span><i class="legend-dot break-dot"></i>休息</span><span class="plan-end-note">最后一轮学习后结束</span></div></div>
+          <div class="quiet-note"><svg class="botanical" viewBox="0 0 120 90" aria-hidden="true"><path d="M44 81C61 61 69 37 78 9M58 58C36 58 27 47 26 33c21-1 34 9 32 25Zm9-22C83 36 95 26 98 13 81 12 70 21 67 36ZM47 76C29 74 20 65 19 53c18 0 29 9 28 23Z"/><path d="m29 37 25 18m19-25 21-13M23 57l21 16"/></svg><p>不必赶路，<br>只管认真走好这一段。</p></div>
+        </aside>
+      </div>
+
+      <section class="history-section" aria-labelledby="history-title"><div class="section-heading"><h2 id="history-title">今日专注记录 <span id="history-count">0 段</span></h2><span id="save-label" class="save-label"><span class="save-dot"></span><span id="save-text">本地保存</span></span></div><ul id="history-list" class="history-list" hidden></ul><div id="history-empty" class="history-empty"><svg class="icon" aria-hidden="true"><use href="#i-leaf"/></svg><p>第一段专注，从现在开始。</p><span>完成一轮学习后，会在这里留下记录。</span></div></section>
+    </main>
+    <footer class="app-footer"><span id="desktop-note">慢慢来，每一段专注都算数。</span><span class="footer-signature">a moment well spent.</span></footer>
+  </div>
+
+  <dialog id="reset-dialog" aria-labelledby="reset-title" aria-describedby="reset-description"><div class="dialog-icon"><svg class="icon" aria-hidden="true"><use href="#i-reset"/></svg></div><h2 id="reset-title">重新安排这段时间？</h2><p id="reset-description">当前未完成的计时会结束，已完成的专注记录会保留。</p><div class="dialog-actions"><button id="cancel-reset-btn" class="secondary-button" type="button" autofocus>继续当前计划</button><button id="confirm-reset-btn" class="primary-button" type="button">重置计划</button></div></dialog>
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  <noscript><p class="noscript-note">请开启浏览器 JavaScript，以使用专注计时器。</p></noscript>
+</body>
+</html>

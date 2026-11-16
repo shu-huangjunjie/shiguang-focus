@@ -1,0 +1,25 @@
+'use strict';
+const fs = require('node:fs');
+const path = require('node:path');
+const crypto = require('node:crypto');
+const root = path.resolve(__dirname, '..');
+const [target, architecture] = process.argv.slice(2);
+const supported = { 'aarch64-pc-windows-msvc': 'arm64', 'x86_64-pc-windows-msvc': 'x64' };
+if (supported[target] !== architecture) throw Error('Specify a supported target and matching architecture.');
+const version = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8')).version;
+const source = path.join(root, 'src-tauri', 'target', target, 'release');
+const output = path.join(root, 'releases', `windows-${architecture}`);
+fs.mkdirSync(output, { recursive: true });
+const portable = `Shiguang-${version}-windows-${architecture}-portable.exe`;
+fs.copyFileSync(path.join(source, 'shiguang.exe'), path.join(output, portable));
+const nsis = path.join(source, 'bundle', 'nsis');
+const installers = fs.readdirSync(nsis).filter(name => name.includes(`_${version}_`) && name.toLowerCase().endsWith('-setup.exe'));
+if (installers.length !== 1) throw Error(`Expected one NSIS installer for ${version}, found ${installers.length}.`);
+const installer = `Shiguang-${version}-windows-${architecture}-setup.exe`;
+fs.copyFileSync(path.join(nsis, installers[0]), path.join(output, installer));
+const checksums = [portable, installer].map(name => {
+  const digest = crypto.createHash('sha256').update(fs.readFileSync(path.join(output, name))).digest('hex');
+  return `${digest}  ${name}`;
+});
+fs.writeFileSync(path.join(output, 'SHA256SUMS.txt'), checksums.join('\n') + '\n');
+console.log(`Collected ${architecture} portable app, installer, and checksums in ${output}`);

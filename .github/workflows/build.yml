@@ -1,0 +1,59 @@
+name: Build desktop apps
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    name: Windows ${{ matrix.arch }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: windows-latest
+            target: x86_64-pc-windows-msvc
+            arch: x64
+          - runner: windows-11-arm
+            target: aarch64-pc-windows-msvc
+            arch: arm64
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Install pnpm
+        run: npm install --global pnpm@11.25.0
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri -> target
+          key: ${{ matrix.arch }}
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Test timer and desktop bridge
+        run: pnpm test
+      - name: Prepare frontend assets
+        run: pnpm build:web
+      - name: Test native timer
+        run: cargo test --manifest-path src-tauri/Cargo.toml --target ${{ matrix.target }} --locked
+      - name: Build app and installer
+        run: pnpm tauri build --target ${{ matrix.target }} --bundles nsis -- --locked
+      - name: Collect release files
+        run: node scripts/collect-release.cjs ${{ matrix.target }} ${{ matrix.arch }}
+      - uses: actions/upload-artifact@v7
+        with:
+          name: Shiguang-windows-${{ matrix.arch }}
+          path: releases/windows-${{ matrix.arch }}/
+          if-no-files-found: error
+          retention-days: 14

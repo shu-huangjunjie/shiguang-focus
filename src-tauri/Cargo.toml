@@ -1,0 +1,34 @@
+[package]
+name = "shiguang"
+version = "0.1.0"
+description = "拾光 · 本地专注计时应用"
+edition = "2021"
+rust-version = "1.90"
+publish = false
+
+[lib]
+name = "shiguang_lib"
+crate-type = ["lib"]
+
+[build-dependencies]
+tauri-build = { version = "2.7.4", features = [] }
+
+[dependencies]
+tauri = { version = "2.12.5", features = ["tray-icon"] }
+tauri-plugin-single-instance = "2"
+serde = { version = "1", features = ["derive"] }
+
+[target.'cfg(windows)'.dependencies]
+windows = { version = "0.62.2", features = ["Data_Xml_Dom", "UI_Notifications"] }
+
+[features]
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = true
+
+[profile.dev]
+debug = 1
